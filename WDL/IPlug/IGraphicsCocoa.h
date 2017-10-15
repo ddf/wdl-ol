@@ -62,6 +62,7 @@ NSString* ToNSString(const char* cStr);
 {
   NSTimer* mTimer;
   NSTextField* mTextFieldView;
+  NSTextView* mTextView; // used when we want Enter to insert carriage returns
   IControl* mEdControl; // the control linked to the open text edit
   IParam* mEdParam; // the param linked to the open text edit (optional)
   int mPrevX, mPrevY;
