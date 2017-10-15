@@ -124,6 +124,13 @@ struct IText
 
 };
 
+enum ETextEntryOptions
+{
+	kTextEntryMultiline = 1, // make a multi-line text entry
+	kTextEntrySelectTextWhenFocused = 1<<1, // select all of the text when the control is focused
+	kTextEntryEnterKeyInsertsCR = 1<<2  // pressing the Enter key inserts a carriage return, rather than commiting the text
+};
+
 // these are macros to shorten the instantiation of IControls
 // for a paramater ID MyParam, define constants named MyParam_X, MyParam_Y, MyParam_W, MyParam_H to specify the Control's IRect
 // then when instantiating a Control you can just call MakeIRect(MyParam) to specify the IRect
