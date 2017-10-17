@@ -219,7 +219,13 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 	  // send the mouse down to it so the carat will jump to the mouse location
 	  if (pGraphics->mParamEditWnd != nullptr && pGraphics->mEdControl != nullptr && !(pGraphics->mEdControl->GetTextEntryOptions() & kTextEntrySelectTextWhenFocused))
 	  {
+		  // we forward the mouse click to the Edit to update its internal state.
+		  // this will place the carat, but often results in one or two characters getting selected as well.
 		  SendMessage(pGraphics->mParamEditWnd, msg, wParam, lParam);
+		  // so we fix this by also finding the closest character position and setting a single-index selection
+		  LRESULT result = SendMessage(pGraphics->mParamEditWnd, EM_CHARFROMPOS, 0, lParam);
+		  int charIndex = LOWORD(result);
+		  SendMessage(pGraphics->mParamEditWnd, EM_SETSEL, charIndex-1, charIndex-1);
 	  }
       return 0;
 
@@ -447,11 +453,6 @@ LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND hWnd, UINT msg, WPARAM wParam,
 			pGraphics->mParamEditMsg = kCommit;
 			return 0;
         }
-		else if (wParam == VK_TAB)
-		{
-			pGraphics->mParamEditMsg = kCommit;
-			return 0;
-		}
         else if (wParam == VK_ESCAPE)
         {
           pGraphics->mParamEditMsg = kCancel;
