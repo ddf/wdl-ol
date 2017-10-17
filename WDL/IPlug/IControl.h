@@ -13,7 +13,7 @@
 // Other controls are readouts only.
 
 #define DEFAULT_TEXT_ENTRY_LEN 7
-#define DEFAULT_TEXT_ENTRY_OPTIONS ETextEntryOptions(kTextEntryMultiline | kTextEntrySelectTextWhenFocused | kTextEntryEnterKeyInsertsCR)
+#define DEFAULT_TEXT_ENTRY_OPTIONS ETextEntryOptions(kTextEntryMultiline | kTextEntrySelectTextWhenFocused)
 
 class IControl
 {
