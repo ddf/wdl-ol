@@ -320,6 +320,14 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
     {
       mGraphics->OnMouseDown(x, y, &ms);
     }
+    
+    // if clicking created a text view and we aren't selecting all the text,
+    // forward the mouse event to the view. this will cause the carat to jump
+    // to where the mouse was clicked.
+    if ( mTextView && !(mEdControl->GetTextEntryOptions() & kTextEntrySelectTextWhenFocused) )
+    {
+      [mTextView mouseDown:pEvent];
+    }
   }
 }
 
