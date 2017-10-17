@@ -460,7 +460,7 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
 
 - (void) removeFromSuperview
 {
-  if (mTextFieldView) [self endUserInput ];
+  if (mTextFieldView || mTextView) [self endUserInput ];
 
   if (mGraphics)
   {
@@ -475,6 +475,23 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
 {
   char* txt = (char*)[[mTextFieldView stringValue] UTF8String];
 
+  if (mEdParam)
+  {
+    mGraphics->SetFromStringAfterPrompt(mEdControl, mEdParam, txt);
+  }
+  else
+  {
+    mEdControl->TextFromTextEntry(txt);
+  }
+  
+  [self endUserInput ];
+  [self setNeedsDisplay: YES];
+}
+
+- (void) textDidEndEditing: (NSNotification*) aNotification
+{
+  char* txt = (char*)[mTextView.string UTF8String];
+  
   if (mEdParam)
   {
     mGraphics->SetFromStringAfterPrompt(mEdControl, mEdParam, txt);
@@ -534,74 +551,110 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
 
 - (void) createTextEntry: (IControl*) pControl : (IParam*) pParam : (IText*) pText : (const char*) pString : (NSRect) areaRect;
 {
-  if (!pControl || mTextFieldView) return;
+  if (!pControl || mTextFieldView || mTextView) return;
 
-  mTextFieldView = [[NSTextField alloc] initWithFrame: areaRect];
-  NSString* font = [NSString stringWithUTF8String: pText->mFont];
-  [mTextFieldView setFont: [NSFont fontWithName:font size: (float) AdjustFontSize(pText->mSize)]];
-
-  switch ( pText->mAlign )
+  if ( pControl->GetTextEntryOptions() & kTextEntryEnterKeyInsertsCR )
   {
-    case IText::kAlignNear:
-      [mTextFieldView setAlignment: NSLeftTextAlignment];
-      break;
-    case IText::kAlignCenter:
-      [mTextFieldView setAlignment: NSCenterTextAlignment];
-      break;
-    case IText::kAlignFar:
-      [mTextFieldView setAlignment: NSRightTextAlignment];
-      break;
-    default:
-      break;
-  }
-
-  // set up formatter
-  if (pParam)
-  {
-    NSMutableCharacterSet *characterSet = [[NSMutableCharacterSet alloc] init];
-
-    switch ( pParam->Type() )
+    mTextView = [[NSTextView alloc] initWithFrame:areaRect];
+    NSString* font = [NSString stringWithUTF8String:pText->mFont];
+    [mTextView setFont: [NSFont fontWithName:font size:pText->mSize]];
+    
+    switch ( pText->mAlign )
     {
-      case IParam::kTypeEnum:
-      case IParam::kTypeInt:
-      case IParam::kTypeBool:
-        [characterSet addCharactersInString:@"0123456789-+"];
+      case IText::kAlignNear:
+        [mTextView setAlignment: NSLeftTextAlignment];
         break;
-      case IParam::kTypeDouble:
-        [characterSet addCharactersInString:@"0123456789.-+"];
+      case IText::kAlignCenter:
+        [mTextView setAlignment: NSCenterTextAlignment];
+        break;
+      case IText::kAlignFar:
+        [mTextView setAlignment: NSRightTextAlignment];
+        break;
+      default:
+        break;
+    }
+    
+    [mTextView setTextColor:ToNSColor(&pText->mTextEntryFGColor)];
+    [mTextView setBackgroundColor:ToNSColor(&pText->mTextEntryBGColor)];
+    
+    mTextView.string = ToNSString(pString);
+    
+    [mTextView setDelegate: (id<NSTextViewDelegate>) self];
+    
+    [self addSubview: mTextView];
+    NSWindow* pWindow = [self window];
+    [pWindow makeKeyAndOrderFront:nil];
+    [pWindow makeFirstResponder: mTextView];
+  }
+  else
+  {
+    mTextFieldView = [[NSTextField alloc] initWithFrame: areaRect];
+    NSString* font = [NSString stringWithUTF8String: pText->mFont];
+    [mTextFieldView setFont: [NSFont fontWithName:font size: (float) AdjustFontSize(pText->mSize)]];
+
+    switch ( pText->mAlign )
+    {
+      case IText::kAlignNear:
+        [mTextFieldView setAlignment: NSLeftTextAlignment];
+        break;
+      case IText::kAlignCenter:
+        [mTextFieldView setAlignment: NSCenterTextAlignment];
+        break;
+      case IText::kAlignFar:
+        [mTextFieldView setAlignment: NSRightTextAlignment];
         break;
       default:
         break;
     }
 
-    [mTextFieldView setFormatter:[[[COCOA_FORMATTER alloc] init] autorelease]];
-    [[mTextFieldView formatter] setAcceptableCharacterSet:characterSet];
-    [[mTextFieldView formatter] setMaximumLength:pControl->GetTextEntryLength()];
-    [characterSet release];
+    // set up formatter
+    if (pParam)
+    {
+      NSMutableCharacterSet *characterSet = [[NSMutableCharacterSet alloc] init];
+
+      switch ( pParam->Type() )
+      {
+        case IParam::kTypeEnum:
+        case IParam::kTypeInt:
+        case IParam::kTypeBool:
+          [characterSet addCharactersInString:@"0123456789-+"];
+          break;
+        case IParam::kTypeDouble:
+          [characterSet addCharactersInString:@"0123456789.-+"];
+          break;
+        default:
+          break;
+      }
+
+      [mTextFieldView setFormatter:[[[COCOA_FORMATTER alloc] init] autorelease]];
+      [[mTextFieldView formatter] setAcceptableCharacterSet:characterSet];
+      [[mTextFieldView formatter] setMaximumLength:pControl->GetTextEntryLength()];
+      [characterSet release];
+    }
+
+    [[mTextFieldView cell] setLineBreakMode: NSLineBreakByTruncatingTail];
+    [mTextFieldView setAllowsEditingTextAttributes:NO];
+    [mTextFieldView setTextColor:ToNSColor(&pText->mTextEntryFGColor)];
+    [mTextFieldView setBackgroundColor:ToNSColor(&pText->mTextEntryBGColor)];
+
+    [mTextFieldView setStringValue: ToNSString(pString)];
+
+  #ifndef COCOA_TEXTENTRY_BORDERED
+    [mTextFieldView setBordered: NO];
+    [mTextFieldView setFocusRingType:NSFocusRingTypeNone];
+  #endif
+    
+  #if __MAC_OS_X_VERSION_MAX_ALLOWED > 1050
+    [mTextFieldView setDelegate: (id<NSTextFieldDelegate>) self];
+  #else
+    [mTextFieldView setDelegate: self];
+  #endif
+    
+    [self addSubview: mTextFieldView];
+    NSWindow* pWindow = [self window];
+    [pWindow makeKeyAndOrderFront:nil];
+    [pWindow makeFirstResponder: mTextFieldView];
   }
-
-  [[mTextFieldView cell] setLineBreakMode: NSLineBreakByTruncatingTail];
-  [mTextFieldView setAllowsEditingTextAttributes:NO];
-  [mTextFieldView setTextColor:ToNSColor(&pText->mTextEntryFGColor)];
-  [mTextFieldView setBackgroundColor:ToNSColor(&pText->mTextEntryBGColor)];
-
-  [mTextFieldView setStringValue: ToNSString(pString)];
-
-#ifndef COCOA_TEXTENTRY_BORDERED
-  [mTextFieldView setBordered: NO];
-  [mTextFieldView setFocusRingType:NSFocusRingTypeNone];
-#endif
-  
-#if __MAC_OS_X_VERSION_MAX_ALLOWED > 1050
-  [mTextFieldView setDelegate: (id<NSTextFieldDelegate>) self];
-#else
-  [mTextFieldView setDelegate: self];
-#endif
-  
-  [self addSubview: mTextFieldView];
-  NSWindow* pWindow = [self window];
-  [pWindow makeKeyAndOrderFront:nil];
-  [pWindow makeFirstResponder: mTextFieldView];
 
   mEdParam = pParam; // might be 0
   mEdControl = pControl;
@@ -609,13 +662,22 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
 
 - (void) endUserInput
 {
-  [mTextFieldView setDelegate: nil];
-  [mTextFieldView removeFromSuperview];
+  if ( mTextFieldView )
+  {
+    [mTextFieldView setDelegate: nil];
+    [mTextFieldView removeFromSuperview];
+  }
+  else if ( mTextView )
+  {
+    [mTextView setDelegate:nil];
+    [mTextView removeFromSuperview];
+  }
 
   NSWindow* pWindow = [self window];
   [pWindow makeFirstResponder: self];
 
   mTextFieldView = 0;
+  mTextView = 0;
   mEdControl = 0;
   mEdParam = 0;
 }
