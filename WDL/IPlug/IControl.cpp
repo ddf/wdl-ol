@@ -3,6 +3,7 @@
 #include "Log.h"
 
 const float GRAYED_ALPHA = 0.25f;
+const int   DISPLAY_FOR_HOST_MAX_CHARS = 64;
 
 void IControl::SetValueFromPlug(double value)
 {
@@ -41,11 +42,11 @@ void IControl::SetDirty(bool pushParamToPlug)
     if (mValDisplayControl) 
     {
       WDL_String plusLabel;
-      char str[32];
+      char str[DISPLAY_FOR_HOST_MAX_CHARS];
       pParam->GetDisplayForHost(str);
-      plusLabel.Set(str, 32);
-      plusLabel.Append(" ", 32);
-      plusLabel.Append(pParam->GetLabelForHost(), 32);
+      plusLabel.Set(str, DISPLAY_FOR_HOST_MAX_CHARS);
+      plusLabel.Append(" ", DISPLAY_FOR_HOST_MAX_CHARS);
+      plusLabel.Append(pParam->GetLabelForHost(), DISPLAY_FOR_HOST_MAX_CHARS);
       
       ((ITextControl*)mValDisplayControl)->SetTextFromPlug(plusLabel.Get());
     }
@@ -668,7 +669,7 @@ void ICaptionControl::OnMouseDblClick(int x, int y, IMouseMod* pMod)
 bool ICaptionControl::Draw(IGraphics* pGraphics)
 {
   IParam* pParam = mPlug->GetParam(mParamIdx);
-  char cStr[32];
+  char cStr[DISPLAY_FOR_HOST_MAX_CHARS];
   pParam->GetDisplayForHost(cStr);
   mStr.Set(cStr);
 
