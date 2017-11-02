@@ -115,7 +115,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
               }
               else
               {
-				const int txtLen = pGraphics->mEdControl->GetTextEntryLength();
+				const int txtLen = pGraphics->mEdControl->GetTextEntryLength() + 1;
 				char* txt = new char[txtLen];
 				SendMessage(pGraphics->mParamEditWnd, WM_GETTEXT, txtLen, (LPARAM)txt);
                 pGraphics->mEdControl->TextFromTextEntry(txt);
