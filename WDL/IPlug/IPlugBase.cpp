@@ -884,12 +884,12 @@ bool IPlugBase::SerializeParams(ByteChunk* pChunk)
   return savedOK;
 }
 
-int IPlugBase::UnserializeParams(ByteChunk* pChunk, int startPos)
+int IPlugBase::UnserializeParams(ByteChunk* pChunk, int startPos, int numParams)
 {
   TRACE;
 
   WDL_MutexLock lock(&mMutex);
-  int i, n = mParams.GetSize(), pos = startPos;
+  int i, n = numParams ? numParams : mParams.GetSize(), pos = startPos;
   for (i = 0; i < n && pos >= 0; ++i)
   {
     IParam* pParam = mParams.Get(i);
