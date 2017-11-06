@@ -416,6 +416,7 @@ public:
 
   void SetTextFromPlug(char* str);
   void ClearTextFromPlug() { SetTextFromPlug( (char *) ""); }
+  const char * GetTextForPlug() const { return mStr.Get(); }
 
   bool Draw(IGraphics* pGraphics);
 
