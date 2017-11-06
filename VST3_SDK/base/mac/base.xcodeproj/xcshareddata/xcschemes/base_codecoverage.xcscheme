@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "F412022914C41F68008F9C84"
-               BuildableName = "libbase_codecoverage.a"
+               BuildableName = "libbase_codecoverage_stdc++.a"
                BlueprintName = "base_codecoverage"
                ReferencedContainer = "container:base.xcodeproj">
             </BuildableReference>
@@ -26,6 +26,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
       </Testables>
@@ -36,6 +37,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
@@ -46,7 +48,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F412022914C41F68008F9C84"
-            BuildableName = "libbase_codecoverage.a"
+            BuildableName = "libbase_codecoverage_stdc++.a"
             BlueprintName = "base_codecoverage"
             ReferencedContainer = "container:base.xcodeproj">
          </BuildableReference>
