@@ -1123,7 +1123,7 @@ bool IGraphics::DrawIText(IText* pTxt, char* str, IRECT* pR, bool measure)
     
     if( pTxt->mAlign == IText::kAlignNear)
     {
-      pR->R = R.right;
+      pR->R = pR->L + R.right;
     }
     else if (pTxt->mAlign == IText::kAlignCenter)
     {
