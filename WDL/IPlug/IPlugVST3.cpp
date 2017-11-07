@@ -568,40 +568,40 @@ tresult PLUGIN_API IPlugVST3::process(ProcessData& data)
   return kResultOk;
 }
 
-//tresult PLUGIN_API IPlugVST3::setState(IBStream* state)
-//{
-//  TRACE;
-//  WDL_MutexLock lock(&mMutex);
-//
-//  ByteChunk chunk;
-//  SerializeState(&chunk); // to get the size
-//
-//  if (chunk.Size() > 0)
-//  {
-//    state->read(chunk.GetBytes(), chunk.Size());
-//    UnserializeState(&chunk, 0);
-//    RedrawParamControls();
-//    return kResultOk;
-//  }
-//
-//  return kResultFalse;
-//}
-//
-//tresult PLUGIN_API IPlugVST3::getState(IBStream* state)
-//{
-//  TRACE;
-//  WDL_MutexLock lock(&mMutex);
-//
-//  ByteChunk chunk;
-//
-//  if (SerializeState(&chunk))
-//  {
-//    state->write(chunk.GetBytes(), chunk.Size());
-//    return kResultOk;
-//  }
-//
-//  return kResultFalse;
-//}
+tresult PLUGIN_API IPlugVST3::setState(IBStream* state)
+{
+  TRACE;
+  WDL_MutexLock lock(&mMutex);
+
+  ByteChunk chunk;
+  SerializeState(&chunk); // to get the size
+
+  if (chunk.Size() > 0)
+  {
+    state->read(chunk.GetBytes(), chunk.Size());
+    UnserializeState(&chunk, 0);
+    RedrawParamControls();
+    return kResultOk;
+  }
+
+  return kResultFalse;
+}
+
+tresult PLUGIN_API IPlugVST3::getState(IBStream* state)
+{
+  TRACE;
+  WDL_MutexLock lock(&mMutex);
+
+  ByteChunk chunk;
+
+  if (SerializeState(&chunk))
+  {
+    state->write(chunk.GetBytes(), chunk.Size());
+    return kResultOk;
+  }
+
+  return kResultFalse;
+}
 
 //tresult PLUGIN_API IPlugVST3::setComponentState(IBStream *state)
 //{
