@@ -73,6 +73,15 @@
     <ClCompile Include="..\..\pluginterfaces\base\funknown.cpp">
       <Filter>Source Files\pluginterfaces</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\fcriticalperformance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\fregion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\istreamwrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\classfactory.h">
@@ -210,5 +219,18 @@
     <ClInclude Include="..\source\tvector.h">
       <Filter>Source Files\container templates</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\pluginterfaces\base\ibstream.h" />
+    <ClInclude Include="..\..\pluginterfaces\base\icloneable.h" />
+    <ClInclude Include="..\..\pluginterfaces\base\pluginbasefwd.h" />
+    <ClInclude Include="..\source\basefwd.h" />
+    <ClInclude Include="..\source\fcriticalperformance.h" />
+    <ClInclude Include="..\source\fgeoconstants.h" />
+    <ClInclude Include="..\source\fregion.h" />
+    <ClInclude Include="..\source\fstdmethods.h" />
+    <ClInclude Include="..\source\fstringmethods.h" />
+    <ClInclude Include="..\source\fstringstream.h" />
+    <ClInclude Include="..\source\funknownfactory.h" />
+    <ClInclude Include="..\source\istreamwrapper.h" />
+    <ClInclude Include="..\source\tcontainerfwd.h" />
   </ItemGroup>
 </Project>

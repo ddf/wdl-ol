@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask TaskName="PaceFixLogs" AssemblyFile="$(PACE_FUSION_HOME)PaceFusionUi2013.dll" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -64,18 +63,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Full</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>false</IntrinsicFunctions>
@@ -94,6 +94,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -108,6 +109,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Full</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>false</IntrinsicFunctions>
@@ -126,6 +128,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -155,6 +158,8 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4985;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -186,6 +191,9 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4985;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <StringPooling>true</StringPooling>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -202,6 +210,7 @@
     <ClCompile Include="..\source\fbitset.cpp" />
     <ClCompile Include="..\source\fbuffer.cpp" />
     <ClCompile Include="..\source\fcpu.cpp" />
+    <ClCompile Include="..\source\fcriticalperformance.cpp" />
     <ClCompile Include="..\source\fdebug.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -212,15 +221,21 @@
     <ClCompile Include="..\source\fobject.cpp" />
     <ClCompile Include="..\source\fpoint.cpp" />
     <ClCompile Include="..\source\frect.cpp" />
+    <ClCompile Include="..\source\fregion.cpp" />
     <ClCompile Include="..\source\fstreamer.cpp" />
     <ClCompile Include="..\source\fstring.cpp" />
     <ClCompile Include="..\source\fthread.cpp" />
+    <ClCompile Include="..\source\istreamwrapper.cpp" />
     <ClCompile Include="..\source\timer.cpp" />
     <ClCompile Include="..\source\updatehandler.cpp" />
     <ClCompile Include="..\..\pluginterfaces\base\conststringtable.cpp" />
     <ClCompile Include="..\..\pluginterfaces\base\funknown.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\pluginterfaces\base\ibstream.h" />
+    <ClInclude Include="..\..\pluginterfaces\base\icloneable.h" />
+    <ClInclude Include="..\..\pluginterfaces\base\pluginbasefwd.h" />
+    <ClInclude Include="..\source\basefwd.h" />
     <ClInclude Include="..\source\classfactory.h" />
     <ClInclude Include="..\source\fatomic.h" />
     <ClInclude Include="..\source\fbitset.h" />
@@ -229,16 +244,25 @@
     <ClInclude Include="..\source\fcommandline.h" />
     <ClInclude Include="..\source\fcontainer.h" />
     <ClInclude Include="..\source\fcpu.h" />
+    <ClInclude Include="..\source\fcriticalperformance.h" />
     <ClInclude Include="..\source\fdebug.h" />
     <ClInclude Include="..\source\fdynlib.h" />
+    <ClInclude Include="..\source\fgeoconstants.h" />
     <ClInclude Include="..\source\finitializer.h" />
     <ClInclude Include="..\source\fmemory.h" />
     <ClInclude Include="..\source\fobject.h" />
     <ClInclude Include="..\source\fpoint.h" />
     <ClInclude Include="..\source\frect.h" />
+    <ClInclude Include="..\source\fregion.h" />
+    <ClInclude Include="..\source\fstdmethods.h" />
     <ClInclude Include="..\source\fstreamer.h" />
     <ClInclude Include="..\source\fstring.h" />
+    <ClInclude Include="..\source\fstringmethods.h" />
+    <ClInclude Include="..\source\fstringstream.h" />
     <ClInclude Include="..\source\fthread.h" />
+    <ClInclude Include="..\source\funknownfactory.h" />
+    <ClInclude Include="..\source\istreamwrapper.h" />
+    <ClInclude Include="..\source\tcontainerfwd.h" />
     <ClInclude Include="..\source\timer.h" />
     <ClInclude Include="..\source\updatehandler.h" />
     <ClInclude Include="..\..\pluginterfaces\base\conststringtable.h" />
@@ -270,7 +294,4 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-  <Target Name="AfterBuild">
-    <PaceFixLogs Condition="Exists('$(PACE_FUSION_HOME)PaceFusionUi2013.dll')" LogDirectory="$(IntDir)" />
-  </Target>
 </Project>
