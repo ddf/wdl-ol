@@ -513,6 +513,26 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
   [self setNeedsDisplay: YES];
 }
 
+// handle doCommandBySelector so we can make CMD+Enter commit the text in the view.
+- (BOOL)textView:(NSTextView *)textView doCommandBySelector:(SEL)commandSelector
+{
+	NSEvent* event = [[self window] currentEvent];
+	if ( event.type == NSEventTypeKeyDown
+	  && (event.keyCode == kVK_Return || event.keyCode == kVK_ANSI_KeypadEnter)
+	  && (event.modifierFlags & NSEventModifierFlagCommand)
+	)
+	{
+		// this returns control to the program and will cause textDidEndEditing to be called
+		[[self window] makeFirstResponder:self];
+		// this is required to reset the mouse cursor back to the arrow.
+		// if we don't do this, it will continue to look like the text editing cursor.
+		[[NSCursor arrowCursor] set];
+		[NSCursor setHiddenUntilMouseMoves:NO];
+		return YES;
+	}
+	return NO;
+}
+
 - (IPopupMenu*) createIPopupMenu: (IPopupMenu*) pMenu : (NSRect) rect;
 {
   IGRAPHICS_MENU_RCVR* dummyView = [[[IGRAPHICS_MENU_RCVR alloc] initWithFrame:rect] autorelease];
