@@ -22,7 +22,7 @@ inline NSColor* ToNSColor(IColor* pColor)
   double g = (double) pColor->G / 255.0;
   double b = (double) pColor->B / 255.0;
   double a = (double) pColor->A / 255.0;
-  return [NSColor colorWithCalibratedRed:r green:g blue:b alpha:a];
+  return [NSColor colorWithRed:r green:g blue:b alpha:a];
 }
 
 NSString* ToNSString(const char* cStr);
