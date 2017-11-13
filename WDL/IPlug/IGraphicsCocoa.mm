@@ -604,6 +604,7 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
     
     [mTextView setTextColor:ToNSColor(&pText->mTextEntryFGColor)];
     [mTextView setBackgroundColor:ToNSColor(&pText->mTextEntryBGColor)];
+    mTextView.insertionPointColor = ToNSColor(&pText->mTextEntryFGColor);
     
     mTextView.string = ToNSString(pString);
     
