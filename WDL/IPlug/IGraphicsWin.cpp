@@ -438,14 +438,20 @@ LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND hWnd, UINT msg, WPARAM wParam,
               break;
           }
         }
+		// if we've already decided to commit or cancel, we should not pass this character on to the text edit.
+		// in the case of using Ctrl+Enter to commit text, this causes a carriage return to become inserted when committing.
+		else if (pGraphics->mParamEditMsg == kCommit || pGraphics->mParamEditMsg == kCancel)
+		{
+			return 0;
+		}
         break;
       }
       case WM_KEYDOWN:
       {
         if (wParam == VK_RETURN)
         {
-			// let the default routine handle the enter key if it should insert a CR
-			if (pGraphics->mEdControl->GetTextEntryOptions() & kTextEntryEnterKeyInsertsCR)
+			// let the default routine handle the enter key if it should insert a CR and Control is not pressed
+			if (pGraphics->mEdControl->GetTextEntryOptions() & kTextEntryEnterKeyInsertsCR && !(GetKeyState(VK_CONTROL) & 0x8000))
 			{
 				break;
 			}
