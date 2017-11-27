@@ -586,6 +586,7 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
     mTextView = [[NSTextView alloc] initWithFrame:areaRect];
     NSString* font = [NSString stringWithUTF8String:pText->mFont];
     [mTextView setFont: [NSFont fontWithName:font size:pText->mSize]];
+    [mTextView setRichText:NO];
     
     switch ( pText->mAlign )
     {
