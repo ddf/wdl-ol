@@ -199,7 +199,8 @@ void IGraphics::Resize(int w, int h)
   mWidth = w;
   mHeight = h;
   ReleaseMouseCapture();
-  mControls.Empty(true);
+  // DQ: don't delete the controls so we don't have to rebuild the entire damn thing!
+  //mControls.Empty(true);
   DELETE_NULL(mDrawBitmap);
   DELETE_NULL(mTmpBitmap);
   PrepDraw();
