@@ -1011,12 +1011,14 @@ void IGraphics::ReleaseMouseCapture()
 bool IGraphics::OnKeyDown(int x, int y, int key)
 {
   int c = GetMouseControlIdx(x, y);
+  bool handled = false;
   if (c > 0)
-    return mControls.Get(c)->OnKeyDown(x, y, key);
-  else if (mKeyCatcher)
-    return mKeyCatcher->OnKeyDown(x, y, key);
-  else
-    return false;
+    handled = mControls.Get(c)->OnKeyDown(x, y, key);
+
+  if (!handled && mKeyCatcher)
+    handled = mKeyCatcher->OnKeyDown(x, y, key);
+
+  return handled;
 }
 
 int IGraphics::GetMouseControlIdx(int x, int y, bool mo)
