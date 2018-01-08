@@ -221,10 +221,9 @@ protected:
 
   // Will append if the chunk is already started
   bool SerializeParams(ByteChunk* pChunk);
-  // if numParams is greater than 0, this will only read numParams from the stream,
+  // #DQF - if numParams is greater than 0, this will only read numParams from the stream,
   // even if it is not the same as mParams.GetSize().
-  // added to make it possible to unserialize a chunk that was created
-  // with fewer params than the current chunk.
+  // added to make it possible to unserialize a chunk that was created with fewer params than the current chunk.
   int UnserializeParams(ByteChunk* pChunk, int startPos, int numParams = 0); // Returns the new chunk position (endPos)
 
   virtual void RedrawParamControls();  // Called after restoring state.

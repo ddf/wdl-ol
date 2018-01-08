@@ -199,7 +199,7 @@ void IGraphics::Resize(int w, int h)
   mWidth = w;
   mHeight = h;
   ReleaseMouseCapture();
-  // DQ: don't delete the controls so we don't have to rebuild the entire damn thing!
+  // #DQF - don't delete the controls so we don't have to rebuild the GUI after a Resize.
   //mControls.Empty(true);
   DELETE_NULL(mDrawBitmap);
   DELETE_NULL(mTmpBitmap);
@@ -704,8 +704,10 @@ bool IGraphics::DrawHorizontalLine(const IColor* pColor, IRECT* pR, float y)
 bool IGraphics::DrawRadialLine(const IColor* pColor, float cx, float cy, float angle, float rMin, float rMax,
                                const IChannelBlend* pBlend, bool antiAlias)
 {
+  // #DQF - explicit cast to elminiate compiler warnings
   float sinV = (float)sin(angle);
   float cosV = (float)cos(angle);
+  //
   float xLo = cx + rMin * sinV;
   float xHi = cx + rMax * sinV;
   float yLo = cy - rMin * cosV;
@@ -1011,6 +1013,7 @@ void IGraphics::ReleaseMouseCapture()
 bool IGraphics::OnKeyDown(int x, int y, int key)
 {
   int c = GetMouseControlIdx(x, y);
+  // #DQF - send key input to the key catcher if it is not handled by another control
   bool handled = false;
   if (c > 0)
     handled = mControls.Get(c)->OnKeyDown(x, y, key);
@@ -1019,6 +1022,7 @@ bool IGraphics::OnKeyDown(int x, int y, int key)
     handled = mKeyCatcher->OnKeyDown(x, y, key);
 
   return handled;
+  //
 }
 
 int IGraphics::GetMouseControlIdx(int x, int y, bool mo)
@@ -1126,7 +1130,9 @@ bool IGraphics::DrawIText(IText* pTxt, char* str, IRECT* pR, bool measure)
     
     if( pTxt->mAlign == IText::kAlignNear)
     {
+      // #DQF - fix incorrect measurement
       pR->R = pR->L + R.right;
+      //
     }
     else if (pTxt->mAlign == IText::kAlignCenter)
     {

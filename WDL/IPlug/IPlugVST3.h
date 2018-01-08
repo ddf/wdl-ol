@@ -47,8 +47,10 @@ public:
   Steinberg::tresult PLUGIN_API setActive(Steinberg::TBool state);
   Steinberg::tresult PLUGIN_API setupProcessing (Steinberg::Vst::ProcessSetup& newSetup);
   Steinberg::tresult PLUGIN_API process(Steinberg::Vst::ProcessData& data);
+  // #DQF - uncommented these because we need them for Reaper
   Steinberg::tresult PLUGIN_API setState(Steinberg::IBStream* state);
   Steinberg::tresult PLUGIN_API getState(Steinberg::IBStream* state);
+  //
 //  Steinberg::tresult PLUGIN_API setComponentState(IBStream *state);
   Steinberg::tresult PLUGIN_API canProcessSampleSize(Steinberg::int32 symbolicSampleSize);
   Steinberg::uint32 PLUGIN_API getLatencySamples ();

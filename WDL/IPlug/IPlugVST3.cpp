@@ -396,7 +396,9 @@ tresult PLUGIN_API IPlugVST3::process(ProcessData& data)
               break;
             }
             case kPresetParam:
+              // #DQF - fix so that we don't skip presets due to floating point error
               RestorePreset(round(FromNormalizedParam(value, 0, NPresets(), 1.)));
+              //
               break;
               //TODO pitch bend, modwheel etc
             default:
@@ -568,6 +570,7 @@ tresult PLUGIN_API IPlugVST3::process(ProcessData& data)
   return kResultOk;
 }
 
+// #DQF - uncommented setState and getState because they are required for Reaper
 tresult PLUGIN_API IPlugVST3::setState(IBStream* state)
 {
   TRACE;
@@ -602,6 +605,7 @@ tresult PLUGIN_API IPlugVST3::getState(IBStream* state)
 
   return kResultFalse;
 }
+//
 
 //tresult PLUGIN_API IPlugVST3::setComponentState(IBStream *state)
 //{

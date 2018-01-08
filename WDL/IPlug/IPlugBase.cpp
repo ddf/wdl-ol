@@ -884,12 +884,15 @@ bool IPlugBase::SerializeParams(ByteChunk* pChunk)
   return savedOK;
 }
 
+// #DQF - added numParams to allow unserializing older version that might have had a different number of params.
 int IPlugBase::UnserializeParams(ByteChunk* pChunk, int startPos, int numParams)
 {
   TRACE;
 
   WDL_MutexLock lock(&mMutex);
+  // #DQF - user numParams if not 0
   int i, n = numParams ? numParams : mParams.GetSize(), pos = startPos;
+  //
   for (i = 0; i < n && pos >= 0; ++i)
   {
     IParam* pParam = mParams.Get(i);

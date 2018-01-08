@@ -13,7 +13,9 @@
 // Other controls are readouts only.
 
 #define DEFAULT_TEXT_ENTRY_LEN 7
+// #DQF - define for default text entry options that make controls behave the same as they would before addition of these options.
 #define DEFAULT_TEXT_ENTRY_OPTIONS ETextEntryOptions(kTextEntryMultiline | kTextEntrySelectTextWhenFocused)
+//
 
 class IControl
 {
@@ -22,7 +24,10 @@ public:
   IControl(IPlugBase* pPlug, IRECT pR, int paramIdx = -1, IChannelBlend blendMethod = IChannelBlend::kBlendNone)
     : mPlug(pPlug), mRECT(pR), mTargetRECT(pR), mParamIdx(paramIdx), mValue(0.0), mDefaultValue(-1.0),
       mBlend(blendMethod), mDirty(true), mHide(false), mGrayed(false), mDisablePrompt(true), mDblAsSingleClick(false),
-      mClampLo(0.0), mClampHi(1.0), mMOWhenGreyed(false), mTextEntryLength(DEFAULT_TEXT_ENTRY_LEN), mTextEntryOptions(DEFAULT_TEXT_ENTRY_OPTIONS),
+      mClampLo(0.0), mClampHi(1.0), mMOWhenGreyed(false), mTextEntryLength(DEFAULT_TEXT_ENTRY_LEN), 
+	  // #DQF - initialize text entry options to default
+	  mTextEntryOptions(DEFAULT_TEXT_ENTRY_OPTIONS),
+      //
       mValDisplayControl(0), mNameDisplayControl(0), mTooltip("") {}
 
   virtual ~IControl() {}
@@ -61,8 +66,10 @@ public:
   IText* GetText() { return &mText; }
   int GetTextEntryLength() { return mTextEntryLength; }
   void SetTextEntryLength(int len) { mTextEntryLength = len;  }
+  // #DQF - get/set text entry options
   ETextEntryOptions GetTextEntryOptions() const { return mTextEntryOptions; }
   void SetTextEntyOptions(ETextEntryOptions options) { mTextEntryOptions = options; }
+  //
   void SetText(IText* txt) { mText = *txt; }
   IRECT* GetRECT() { return &mRECT; }       // The draw area for this control.
   IRECT* GetTargetRECT() { return &mTargetRECT; } // The mouse target area (default = draw area).
@@ -127,7 +134,9 @@ public:
 
 protected:
   int mTextEntryLength;
+  // #DQF - text entry options member
   ETextEntryOptions mTextEntryOptions;
+  //
   IText mText;
   IPlugBase* mPlug;
   IRECT mRECT, mTargetRECT;
@@ -416,7 +425,9 @@ public:
 
   void SetTextFromPlug(char* str);
   void ClearTextFromPlug() { SetTextFromPlug( (char *) ""); }
+  // #DQF - access for current text value
   const char * GetTextForPlug() const { return mStr.Get(); }
+  //
 
   bool Draw(IGraphics* pGraphics);
 

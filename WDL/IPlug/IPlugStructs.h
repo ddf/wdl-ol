@@ -124,12 +124,14 @@ struct IText
 
 };
 
+// #DQF - ETextEntryOptions for finer control over how text editing behaves
 enum ETextEntryOptions
 {
 	kTextEntryMultiline = 1, // make a multi-line text entry
 	kTextEntrySelectTextWhenFocused = 1<<1, // select all of the text when the control is focused
 	kTextEntryEnterKeyInsertsCR = 1<<2  // pressing the Enter key inserts a carriage return, rather than commiting the text
 };
+//
 
 // these are macros to shorten the instantiation of IControls
 // for a paramater ID MyParam, define constants named MyParam_X, MyParam_Y, MyParam_W, MyParam_H to specify the Control's IRect
@@ -227,17 +229,21 @@ struct IRECT
   inline IRECT SubRectVertical(int numSlices, int sliceIdx)
   {
     float heightOfSubRect = (float(H()) / numSlices);
+    // #DQF - explicit cast to eliminate compiler warnings
 	int t = (int)(heightOfSubRect * sliceIdx);
 
     return IRECT(L, T + t, R, T + t + (int)heightOfSubRect);
+    //
   }
 
   inline IRECT SubRectHorizontal(int numSlices, int sliceIdx)
   {
     float widthOfSubRect = (float(W()) / numSlices);
+    // #DQF - explicit cast to eliminate compiler warnings
     int l = (int)(widthOfSubRect * sliceIdx);
 
     return IRECT(L + l, T, L + l + (int)widthOfSubRect, B);
+    //
   }
   
   inline IRECT GetPadded(int padding)

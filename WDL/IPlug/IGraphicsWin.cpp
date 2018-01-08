@@ -61,6 +61,9 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
   }
 
   IGraphicsWin* pGraphics = (IGraphicsWin*) GetWindowLongPtr(hWnd, GWLP_USERDATA);
+  // #DQF - only declare this when getting text from an mEdParam,
+  // otherwise we will new up space to retrieve text based on the length specified by the control.
+  //char txt[MAX_PARAM_LEN];
   double v;
 
   if (!pGraphics || hWnd != pGraphics->mPlugWnd)
@@ -93,8 +96,10 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
             {            
               if(pGraphics->mEdParam)
               {
+                // #DQF - retrieve param value as text, limited to defined max length
 				char txt[MAX_PARAM_LEN];
 				SendMessage(pGraphics->mParamEditWnd, WM_GETTEXT, MAX_PARAM_LEN, (LPARAM)txt);
+                //
                 IParam::EParamType type = pGraphics->mEdParam->Type();
 
                 if ( type == IParam::kTypeEnum || type == IParam::kTypeBool)
@@ -115,11 +120,13 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
               }
               else
               {
+                // #DQF - allocate an array that can hold text entry length requested by the control
 				const int txtLen = pGraphics->mEdControl->GetTextEntryLength() + 1;
 				char* txt = new char[txtLen];
 				SendMessage(pGraphics->mParamEditWnd, WM_GETTEXT, txtLen, (LPARAM)txt);
                 pGraphics->mEdControl->TextFromTextEntry(txt);
 				delete[] txt;
+                //
               }
               // Fall through.
             }
@@ -215,7 +222,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
       }
 #endif
       pGraphics->OnMouseDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), &GetMouseMod(wParam));
-	  // if this mouse down created an edit window and we didn't select the text,
+	  // #DQF - if this mouse down created an edit window and we didn't select the text,
 	  // send the mouse down to it so the carat will jump to the mouse location
 	  if (pGraphics->mParamEditWnd != nullptr && pGraphics->mEdControl != nullptr && !(pGraphics->mEdControl->GetTextEntryOptions() & kTextEntrySelectTextWhenFocused))
 	  {
@@ -227,6 +234,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 		  int charIndex = LOWORD(result);
 		  SendMessage(pGraphics->mParamEditWnd, EM_SETSEL, charIndex-1, charIndex-1);
 	  }
+      //
       return 0;
 
     case WM_MOUSEMOVE:
@@ -362,9 +370,10 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
       SetBkColor(dc, RGB(pText->mTextEntryBGColor.R, pText->mTextEntryBGColor.G, pText->mTextEntryBGColor.B));
       SetTextColor(dc, RGB(pText->mTextEntryFGColor.R, pText->mTextEntryFGColor.G, pText->mTextEntryFGColor.B));
       SetBkMode(dc, OPAQUE);
-	  // in order to have the entire text edit background draw with mTextEntryBGColor, we have to se the DC Brush Color.
+	  // #DQF - in order to have the entire text edit background draw with mTextEntryBGColor, we have to set the DC Brush Color.
 	  // otherwise, the background color will only appear where there is text and the rest of the rect will be white.
 	  SetDCBrushColor(dc, RGB(pText->mTextEntryBGColor.R, pText->mTextEntryBGColor.G, pText->mTextEntryBGColor.B));
+      //
       return (BOOL)GetStockObject(DC_BRUSH);
     }
 
@@ -438,16 +447,18 @@ LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND hWnd, UINT msg, WPARAM wParam,
               break;
           }
         }
-		// if we've already decided to commit or cancel, we should not pass this character on to the text edit.
+		// #DQF - if we've already decided to commit or cancel, we should not pass this character on to the text edit.
 		// in the case of using Ctrl+Enter to commit text, this causes a carriage return to become inserted when committing.
 		else if (pGraphics->mParamEditMsg == kCommit || pGraphics->mParamEditMsg == kCancel)
 		{
 			return 0;
 		}
+        //
         break;
       }
       case WM_KEYDOWN:
       {
+        // #DQF - keydown changes to support text entry options that want kTextEntryEnterKeyInsertsCR
         if (wParam == VK_RETURN)
         {
 			// let the default routine handle the enter key if it should insert a CR and Control is not pressed
@@ -459,6 +470,7 @@ LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND hWnd, UINT msg, WPARAM wParam,
 			pGraphics->mParamEditMsg = kCommit;
 			return 0;
         }
+        //
         else if (wParam == VK_ESCAPE)
         {
           pGraphics->mParamEditMsg = kCancel;
@@ -994,6 +1006,7 @@ void IGraphicsWin::CreateTextEntry(IControl* pControl, IText* pText, IRECT* pTex
     default:                  editStyle = ES_CENTER; break;
   }
 
+  // #DQF - changes to support the various text entry options
   DWORD multiLine = pControl->GetTextEntryOptions() & kTextEntryMultiline ? ES_MULTILINE : 0;
   // when ES_WANTRETURN is included in the style, pressing Enter in a text entry will insert a carriage return
   DWORD wantReturn = pControl->GetTextEntryOptions() & kTextEntryEnterKeyInsertsCR ? ES_WANTRETURN : 0;
@@ -1010,6 +1023,7 @@ void IGraphicsWin::CreateTextEntry(IControl* pControl, IText* pText, IRECT* pTex
   {
 	  SendMessage(mParamEditWnd, EM_SETSEL, 0, -1);
   }
+  //
 
   SetFocus(mParamEditWnd);
 
