@@ -22,7 +22,10 @@ inline NSColor* ToNSColor(IColor* pColor)
   double g = (double) pColor->G / 255.0;
   double b = (double) pColor->B / 255.0;
   double a = (double) pColor->A / 255.0;
+  // #DQF - colorWithCalibratedRed:green:blue:alpha is suggested to be avoided
+  // and generates colors that are noticably different from what LICE renders.
   return [NSColor colorWithRed:r green:g blue:b alpha:a];
+  //
 }
 
 NSString* ToNSString(const char* cStr);
@@ -62,7 +65,9 @@ NSString* ToNSString(const char* cStr);
 {
   NSTimer* mTimer;
   NSTextField* mTextFieldView;
-  NSTextView* mTextView; // used when we want Enter to insert carriage returns
+  // #DQF - used when we want Enter to insert carriage returns
+  NSTextView* mTextView;
+  //
   IControl* mEdControl; // the control linked to the open text edit
   IParam* mEdParam; // the param linked to the open text edit (optional)
   int mPrevX, mPrevY;

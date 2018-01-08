@@ -47,6 +47,7 @@
 #elif defined OS_OSX
   #include "IGraphicsMac.h"
   #define EXPORT __attribute__ ((visibility("default")))
+  // #DQF - use BUNDLE_DOMAIN to allow ids that don't start with com (should be defined in resource.h)
   #define BUNDLE_ID BUNDLE_DOMAIN "." BUNDLE_MFR "." API_EXT "." BUNDLE_NAME
 #elif defined OS_LINUX
   //TODO

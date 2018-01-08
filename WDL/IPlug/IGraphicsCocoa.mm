@@ -321,13 +321,14 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
       mGraphics->OnMouseDown(x, y, &ms);
     }
     
-    // if clicking created a text view and we aren't selecting all the text,
+    // #DQF - if clicking created a text view and we aren't selecting all the text,
     // forward the mouse event to the view. this will cause the carat to jump
     // to where the mouse was clicked.
     if ( mTextView && !(mEdControl->GetTextEntryOptions() & kTextEntrySelectTextWhenFocused) )
     {
       [mTextView mouseDown:pEvent];
     }
+    //
   }
 }
 
@@ -468,7 +469,9 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
 
 - (void) removeFromSuperview
 {
+  // #DQF - handle both kinds of text view
   if (mTextFieldView || mTextView) [self endUserInput ];
+  //
 
   if (mGraphics)
   {
@@ -496,6 +499,7 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
   [self setNeedsDisplay: YES];
 }
 
+// #DQF - delegate method for mTextView (equivalent of controlTextDidEndEditing)
 - (void) textDidEndEditing: (NSNotification*) aNotification
 {
   char* txt = (char*)[mTextView.string UTF8String];
@@ -512,8 +516,9 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
   [self endUserInput ];
   [self setNeedsDisplay: YES];
 }
+//
 
-// handle doCommandBySelector so we can make CMD+Enter commit the text in the view.
+// #DQF - handle doCommandBySelector so we can make CMD+Enter commit the text in the view.
 - (BOOL)textView:(NSTextView *)textView doCommandBySelector:(SEL)commandSelector
 {
 	NSEvent* event = [[self window] currentEvent];
@@ -532,6 +537,7 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
 	}
 	return NO;
 }
+//
 
 - (IPopupMenu*) createIPopupMenu: (IPopupMenu*) pMenu : (NSRect) rect;
 {
@@ -577,6 +583,9 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
   else return 0;
 }
 
+// #DQF - heavily modified to create an NSTextView if the control wants kTextEntryEnterKeyInsertsCR.
+// Attempts to maintain same basic behavior in the view as would be present without that option.
+// However, note that text formatting is only supported when enter key commits.
 - (void) createTextEntry: (IControl*) pControl : (IParam*) pParam : (IText*) pText : (const char*) pString : (NSRect) areaRect;
 {
   if (!pControl || mTextFieldView || mTextView) return;
@@ -586,6 +595,7 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
     mTextView = [[NSTextView alloc] initWithFrame:areaRect];
     NSString* font = [NSString stringWithUTF8String:pText->mFont];
     [mTextView setFont: [NSFont fontWithName:font size:pText->mSize]];
+    // we disable rich text so that pasted-in text doesn't keep text attributes like color, etc.
     [mTextView setRichText:NO];
     
     switch ( pText->mAlign )
@@ -689,6 +699,7 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
   mEdParam = pParam; // might be 0
   mEdControl = pControl;
 }
+//
 
 - (void) endUserInput
 {
