@@ -594,7 +594,7 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
   {
     mTextView = [[NSTextView alloc] initWithFrame:areaRect];
     NSString* font = [NSString stringWithUTF8String:pText->mFont];
-    [mTextView setFont: [NSFont fontWithName:font size:(float)AdjustFontSize(pText->mSize)]];
+    [mTextView setFont: [NSFont fontWithName:font size:(float)(pText->mSize)]];
     // we disable rich text so that pasted-in text doesn't keep text attributes like color, etc.
     [mTextView setRichText:NO];
     
