@@ -599,16 +599,9 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
     // we disable rich text so that pasted-in text doesn't keep text attributes like color, etc.
     [mTextView setRichText:NO];
 	  
-    // instead of scaling the font size, which gives poor results,
-    // we set the line height multiple to about the same scale as is used in AdjustFontSize.
-    // this is a hack that may or may not work with all fonts.
-    NSMutableParagraphStyle *textParagraph = [[NSMutableParagraphStyle alloc] init];
-    [textParagraph setLineHeightMultiple:0.85];
-    [mTextView setDefaultParagraphStyle:textParagraph];
-	  
     // this prevents the view from adding a spacing on the left that is not present in the LICE render
     [mTextView.textContainer setLineFragmentPadding:0];
-    
+	  
     switch ( pText->mAlign )
     {
       case IText::kAlignNear:
