@@ -622,6 +622,14 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
     mTextView.insertionPointColor = ToNSColor(&pText->mTextEntryFGColor);
     
     mTextView.string = ToNSString(pString);
+    // #DQF - total hack to fix widening of Monaco in a DAW vs the Standalone.
+    // even with this tweak, some characters still move a little bit, but it's better than nothing.
+#if !SA_API
+    [mTextView.textStorage addAttribute:NSKernAttributeName
+								  value:[NSNumber numberWithFloat:-0.4f]
+								  range:NSMakeRange(0, [mTextView.string length])];
+#endif
+    //
     
     [mTextView setDelegate: (id<NSTextViewDelegate>) self];
     

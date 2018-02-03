@@ -184,11 +184,9 @@ inline CGRect ToCGRect(int h, IRECT* pR)
   return CGRectMake(pR->L, B, pR->W(), B + pR->H());
 }
 
-// #DQF - return a float because OSX can handle sizes like this and it gives better results
-inline float AdjustFontSize(int size)
+inline int AdjustFontSize(int size)
 {
   return 0.9f * (float)size;
 }
-//
 
 #endif
