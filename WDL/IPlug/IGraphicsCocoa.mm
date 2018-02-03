@@ -601,6 +601,7 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
 	  
     // this prevents the view from adding a spacing on the left that is not present in the LICE render
     [mTextView.textContainer setLineFragmentPadding:0];
+    [mTextView setVerticallyResizable:NO];
 	  
     switch ( pText->mAlign )
     {
