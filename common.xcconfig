@@ -23,7 +23,7 @@ CLANG_CXX_LANGUAGE_STANDARD = c++0x
 CLANG_CXX_LIBRARY = libc++
 
 // the minimum OS to support
-DEPLOYMENT_TARGET = 10.7
+MACOSX_DEPLOYMENT_TARGET = 10.7
 
 // Where the SDKs etc are located in relation to the plugin xcode project
 WDL_PATH = $(SRCROOT)/../../WDL
