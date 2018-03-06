@@ -448,6 +448,27 @@ struct ISysEx
 
   void Clear();
   void LogMsg();
+
+  //////////////////////////////////////////////////////////////////////////
+  // #DQF - some basic support for parsing MMC commands
+  enum EMMCCommand
+  {
+	  kNone = 0,
+	  kStop = 1,
+	  kPlay = 2,
+	  kDeferredPlay = 3,
+	  kFastFoward = 4,
+	  kRewind = 5,
+	  kRecordStrobe = 6,
+	  kRecordExit = 7,
+	  kRecordReady = 8,
+	  kPause = 9,
+  };
+
+  bool IsMMC() const;
+  int MMCDeviceId() const;
+  EMMCCommand MMCCommand() const;
+  //////////////////////////////////////////////////////////////////////////
 };
 
 const int MAX_PRESET_NAME_LEN = 256;
