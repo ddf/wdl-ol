@@ -67,7 +67,7 @@ bool IPlugStandalone::SendMidiMsg(IMidiMsg* pMsg)
     IMidiMsg newMsg = *pMsg;
 
     // if the midi channel out filter is set, reassign the status byte appropriately
-    if (mMidiOutChan != 0)
+    if (mMidiOutChan != 0 && *mMidiOutChan != 0)
     {
       newMsg.mStatus = (*mMidiOutChan)-1 | ((unsigned int) newMsg.StatusMsg() << 4) ;
     }
