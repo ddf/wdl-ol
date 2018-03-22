@@ -777,8 +777,8 @@ bool IGraphics::Draw(IRECT* pR)
       if (!(pControl->IsHidden()) && pR->Intersects(pControl->GetRECT()))
       {
         pControl->Draw(this);
+		pControl->SetClean();
       }
-      pControl->SetClean();
     }
   }
   else
