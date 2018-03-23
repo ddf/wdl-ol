@@ -896,7 +896,8 @@ int IPlugBase::UnserializeParams(ByteChunk* pChunk, int startPos, int numParams)
   for (i = 0; i < n && pos >= 0; ++i)
   {
     IParam* pParam = mParams.Get(i);
-    double v = 0.0;
+	// #DQF - if Get fails, make sure the param winds up with the default value, not always 0.
+	double v = pParam->GetDefault();
     Trace(TRACELOC, "%d %s %f", i, pParam->GetNameForHost(), pParam->Value());
     pos = pChunk->Get(&v, pos);
     pParam->Set(v);
