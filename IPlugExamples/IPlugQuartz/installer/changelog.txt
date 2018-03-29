@@ -1,0 +1,4 @@
+IPlugQuartz changelog
+https://damikyu.itch.io/melodizer
+
+00/00/00 - v1.0.0 [initial release]
