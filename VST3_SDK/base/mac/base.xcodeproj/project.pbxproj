@@ -1080,7 +1080,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F4306DED17DDC9500075E8C4 /* libbase_stdc++.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_LINK_OBJC_RUNTIME = YES;
+				SDKROOT = macosx;
+				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
 		};
@@ -1088,13 +1091,11 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F4306DED17DDC9500075E8C4 /* libbase_stdc++.xcconfig */;
 			buildSettings = {
-				ARCHS = (
-					x86_64,
-					i386,
-					ppc,
-				);
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_LINK_OBJC_RUNTIME = YES;
 				DEPLOYMENT_POSTPROCESSING = NO;
+				SDKROOT = macosx;
+				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};
@@ -1169,8 +1170,11 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F4306DEC17DDC9500075E8C4 /* libbase_libc++.xcconfig */;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_LINK_OBJC_RUNTIME = YES;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				SDKROOT = macosx;
+				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
 		};
@@ -1178,14 +1182,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F4306DEC17DDC9500075E8C4 /* libbase_libc++.xcconfig */;
 			buildSettings = {
-				ARCHS = (
-					x86_64,
-					i386,
-					ppc,
-				);
-				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_LINK_OBJC_RUNTIME = YES;
 				DEPLOYMENT_POSTPROCESSING = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				SDKROOT = macosx;
+				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};
