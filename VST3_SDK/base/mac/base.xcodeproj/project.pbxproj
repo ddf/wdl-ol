@@ -1078,7 +1078,6 @@
 /* Begin XCBuildConfiguration section */
 		1DEB91EC08733DB70010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4FA70847158B454300BFC572 /* common.xcconfig */;
 			baseConfigurationReference = F4306DED17DDC9500075E8C4 /* libbase_stdc++.xcconfig */;
 			buildSettings = {
 				CLANG_LINK_OBJC_RUNTIME = YES;
@@ -1087,7 +1086,6 @@
 		};
 		1DEB91ED08733DB70010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4FA70847158B454300BFC572 /* common.xcconfig */;
 			baseConfigurationReference = F4306DED17DDC9500075E8C4 /* libbase_stdc++.xcconfig */;
 			buildSettings = {
 				ARCHS = (
@@ -1102,7 +1100,6 @@
 		};
 		1DEB91F008733DB70010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4FA70847158B454300BFC572 /* common.xcconfig */;
 			baseConfigurationReference = 9FC562BA0E373E6E00886555 /* debug.xcconfig */;
 			buildSettings = {
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
@@ -1112,7 +1109,6 @@
 		};
 		1DEB91F108733DB70010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4FA70847158B454300BFC572 /* common.xcconfig */;
 			baseConfigurationReference = 9FC562BE0E373E6E00886555 /* release.xcconfig */;
 			buildSettings = {
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
@@ -1122,7 +1118,6 @@
 		};
 		F412026814C41F68008F9C84 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4FA70847158B454300BFC572 /* common.xcconfig */;
 			baseConfigurationReference = F4306DEF17DDCACB0075E8C4 /* libbase_codecoverage.xcconfig */;
 			buildSettings = {
 			};
@@ -1130,7 +1125,6 @@
 		};
 		F412026914C41F68008F9C84 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4FA70847158B454300BFC572 /* common.xcconfig */;
 			baseConfigurationReference = F4306DEF17DDCACB0075E8C4 /* libbase_codecoverage.xcconfig */;
 			buildSettings = {
 				DEPLOYMENT_POSTPROCESSING = NO;
@@ -1175,6 +1169,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F4306DEC17DDC9500075E8C4 /* libbase_libc++.xcconfig */;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
 				CLANG_LINK_OBJC_RUNTIME = YES;
 			};
 			name = Debug;
@@ -1188,6 +1183,7 @@
 					i386,
 					ppc,
 				);
+				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
 				CLANG_LINK_OBJC_RUNTIME = YES;
 				DEPLOYMENT_POSTPROCESSING = NO;
 			};
