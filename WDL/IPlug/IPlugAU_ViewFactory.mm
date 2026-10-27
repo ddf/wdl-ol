@@ -1,5 +1,6 @@
 #import <Cocoa/Cocoa.h>
 #include "../IPlug/IGraphicsCocoa.h"
+#include "IPlugAU.h"
 #include "resource.h"   // This is your plugin's resource.h.
 
 @interface VIEW_CLASS : NSObject <AUCocoaUIBase>
@@ -24,7 +25,13 @@
 - (NSView*) uiViewForAudioUnit: (AudioUnit) audioUnit withSize: (NSSize) preferredSize
 {
   TRACE;
-  mPlug = (IPlugBase*) GetComponentInstanceStorage(audioUnit);
+  mPlug = 0;
+  void* pObject = 0;
+  UInt32 size = sizeof(pObject);
+  if (AudioUnitGetProperty(audioUnit, kIPlugObjectPropertyID, kAudioUnitScope_Global, 0, &pObject, &size) == noErr)
+  {
+    mPlug = (IPlugBase*) pObject;
+  }
   if (mPlug) {
     IGraphics* pGraphics = mPlug->GetGUI();   
     if (pGraphics) {

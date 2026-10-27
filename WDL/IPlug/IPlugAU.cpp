@@ -1,3 +1,4 @@
+#include <dlfcn.h>
 #include "IPlugAU.h"
 #include "IGraphicsMac.h"
 #include "Log.h"
@@ -56,6 +57,37 @@ int PtrListInitialize(WDL_PtrList<C>* pList, int size)
 #else
   #define GET_COMP_PARAM(TYPE, IDX, NUM) *((TYPE*)&(params->params[IDX]))
 #endif
+
+
+// Replaces the Component Manager's GetComponentInfo, which does not work for AudioComponent instances.
+static OSStatus GetAUDescription(ComponentInstance ci, AudioComponentDescription* pDesc)
+{
+  AudioComponent comp = AudioComponentInstanceGetComponent((AudioComponentInstance) ci);
+  if (!comp)
+  {
+    return kAudioUnitErr_InvalidElement;
+  }
+  return AudioComponentGetDescription(comp, pDesc);
+}
+
+// URL of the bundle this code was loaded from (<bundle>/Contents/MacOS/<binary>). Looking it up by bundle
+// identifier is ambiguous when several copies of the plug-in are installed.
+static CFURLRef CopyOwnBundleURL()
+{
+  Dl_info info;
+  if (!dladdr((const void*) &GetAUDescription, &info) || !info.dli_fname)
+  {
+    return 0;
+  }
+  CFURLRef exe = CFURLCreateFromFileSystemRepresentation(0, (const UInt8*) info.dli_fname, strlen(info.dli_fname), false);
+  CFURLRef macos = CFURLCreateCopyDeletingLastPathComponent(0, exe);
+  CFURLRef contents = CFURLCreateCopyDeletingLastPathComponent(0, macos);
+  CFURLRef bundle = CFURLCreateCopyDeletingLastPathComponent(0, contents);
+  CFRelease(exe);
+  CFRelease(macos);
+  CFRelease(contents);
+  return bundle;
+}
 
 #define NO_OP(select) case select: return badComponentSelector;
 
@@ -909,6 +941,16 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
       }
       return kAudioUnitErr_InvalidProperty;
     }
+    case kIPlugObjectPropertyID:
+    {
+      *pDataSize = sizeof(void*);
+      *pWriteable = false;
+      if (pData)
+      {
+        *((void**) pData) = this;
+      }
+      return noErr;
+    }
     case kAudioUnitProperty_CocoaUI:                      // 31,
     {
       if (GetGUI() && IGraphicsMac::GetUserOSVersion() >= 0x1050)
@@ -917,9 +959,13 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
         if (pData)
         {
           AudioUnitCocoaViewInfo* pViewInfo = (AudioUnitCocoaViewInfo*) pData;
-          CFStrLocal bundleID(mOSXBundleID.Get());
-          CFBundleRef pBundle = CFBundleGetBundleWithIdentifier(bundleID.mCFStr);
-          CFURLRef url = CFBundleCopyBundleURL(pBundle);
+          CFURLRef url = CopyOwnBundleURL();
+          if (!url)
+          {
+            CFStrLocal bundleID(mOSXBundleID.Get());
+            CFBundleRef pBundle = CFBundleGetBundleWithIdentifier(bundleID.mCFStr);
+            url = CFBundleCopyBundleURL(pBundle);
+          }
           pViewInfo->mCocoaAUViewBundleLocation = url;
           pViewInfo->mCocoaAUViewClass[0] = MakeCFString(mCocoaViewFactoryClassName.Get());
         }
@@ -1462,8 +1508,8 @@ inline bool GetDataFromDict(CFDictionaryRef pDict, const char* key, ByteChunk* p
 
 ComponentResult IPlugAU::GetState(CFPropertyListRef* ppPropList)
 {
-  ComponentDescription cd;
-  ComponentResult r = GetComponentInfo((Component) mCI, &cd, 0, 0, 0);
+  AudioComponentDescription cd;
+  ComponentResult r = GetAUDescription(mCI, &cd);
   if (r != noErr)
   {
     return r;
@@ -1491,8 +1537,8 @@ ComponentResult IPlugAU::GetState(CFPropertyListRef* ppPropList)
 
 ComponentResult IPlugAU::SetState(CFPropertyListRef pPropList)
 {
-  ComponentDescription cd;
-  ComponentResult r = GetComponentInfo((Component) mCI, &cd, 0, 0, 0);
+  AudioComponentDescription cd;
+  ComponentResult r = GetAUDescription(mCI, &cd);
   if (r != noErr)
   {
     return r;
@@ -2167,4 +2213,215 @@ void IPlugAU::SetLatency(int samples)
 bool IPlugAU::SendMidiMsg(IMidiMsg* pMsg)
 {
   return false;
+}
+
+
+// ---------------------------------------------------------------------------------------------
+// AU v2 (AudioComponent) support
+// ---------------------------------------------------------------------------------------------
+
+namespace
+{
+struct AUv2Instance
+{
+  AudioComponentPlugInInterface mInterface; // must stay first, the host owns a pointer to it
+  IPlugAU* mPlug;
+};
+
+// Component Manager passes every argument as a pointer-sized slot. params[i + 1] holds argument i
+// (see GET_COMP_PARAM), so scalars are stored in the low bytes of the slot.
+template <class T>
+long PackParam(T value)
+{
+  long slot = 0;
+  memcpy(&slot, &value, sizeof(T));
+  return slot;
+}
+
+template <size_t N>
+OSStatus CallEntry(void* pSelf, SInt16 what, const long (&args)[N])
+{
+  struct
+  {
+    UInt8 flags;
+    UInt8 paramSize;
+    SInt16 what;
+    long params[N + 1];
+  } buf;
+  memset(&buf, 0, sizeof(buf));
+  buf.what = what;
+  buf.paramSize = (UInt8) (N * sizeof(long));
+  for (size_t i = 0; i < N; ++i)
+  {
+    buf.params[i + 1] = args[i];
+  }
+  return IPlugAU::IPlugAUEntry((ComponentParameters*) &buf, ((AUv2Instance*) pSelf)->mPlug);
+}
+
+OSStatus CallEntry(void* pSelf, SInt16 what)
+{
+  const long none[1] = { 0 };
+  return CallEntry(pSelf, what, none);
+}
+
+OSStatus AUv2Initialize(void* s) { return CallEntry(s, kAudioUnitInitializeSelect); }
+OSStatus AUv2Uninitialize(void* s) { return CallEntry(s, kAudioUnitUninitializeSelect); }
+OSStatus AUv2Reset(void* s, AudioUnitScope, AudioUnitElement) { return CallEntry(s, kAudioUnitResetSelect); }
+
+OSStatus AUv2GetPropertyInfo(void* s, AudioUnitPropertyID id, AudioUnitScope scope, AudioUnitElement el,
+                             UInt32* pSize, Boolean* pWritable)
+{
+  const long a[] = { PackParam(id), PackParam(scope), PackParam(el), PackParam(pSize), PackParam(pWritable) };
+  return CallEntry(s, kAudioUnitGetPropertyInfoSelect, a);
+}
+
+OSStatus AUv2GetProperty(void* s, AudioUnitPropertyID id, AudioUnitScope scope, AudioUnitElement el,
+                         void* pData, UInt32* pSize)
+{
+  const long a[] = { PackParam(id), PackParam(scope), PackParam(el), PackParam(pData), PackParam(pSize) };
+  return CallEntry(s, kAudioUnitGetPropertySelect, a);
+}
+
+OSStatus AUv2SetProperty(void* s, AudioUnitPropertyID id, AudioUnitScope scope, AudioUnitElement el,
+                         const void* pData, UInt32 size)
+{
+  // The Component Manager entry expects a pointer to the size, the v2 interface passes it by value.
+  const long a[] = { PackParam(id), PackParam(scope), PackParam(el), PackParam(pData), PackParam(&size) };
+  return CallEntry(s, kAudioUnitSetPropertySelect, a);
+}
+
+OSStatus AUv2AddPropertyListener(void* s, AudioUnitPropertyID id, AudioUnitPropertyListenerProc proc, void* ref)
+{
+  const long a[] = { PackParam(id), PackParam(proc), PackParam(ref) };
+  return CallEntry(s, kAudioUnitAddPropertyListenerSelect, a);
+}
+
+OSStatus AUv2RemovePropertyListener(void* s, AudioUnitPropertyID id, AudioUnitPropertyListenerProc proc)
+{
+  const long a[] = { PackParam(id), PackParam(proc) };
+  return CallEntry(s, kAudioUnitRemovePropertyListenerSelect, a);
+}
+
+OSStatus AUv2RemovePropertyListenerWithUserData(void* s, AudioUnitPropertyID id,
+                                                AudioUnitPropertyListenerProc proc, void* ref)
+{
+  const long a[] = { PackParam(id), PackParam(proc), PackParam(ref) };
+  return CallEntry(s, kAudioUnitRemovePropertyListenerWithUserDataSelect, a);
+}
+
+OSStatus AUv2AddRenderNotify(void* s, AURenderCallback proc, void* ref)
+{
+  const long a[] = { PackParam(proc), PackParam(ref) };
+  return CallEntry(s, kAudioUnitAddRenderNotifySelect, a);
+}
+
+OSStatus AUv2RemoveRenderNotify(void* s, AURenderCallback proc, void* ref)
+{
+  const long a[] = { PackParam(proc), PackParam(ref) };
+  return CallEntry(s, kAudioUnitRemoveRenderNotifySelect, a);
+}
+
+OSStatus AUv2GetParameter(void* s, AudioUnitParameterID id, AudioUnitScope scope, AudioUnitElement el,
+                          AudioUnitParameterValue* pValue)
+{
+  const long a[] = { PackParam(id), PackParam(scope), PackParam(el), PackParam(pValue) };
+  return CallEntry(s, kAudioUnitGetParameterSelect, a);
+}
+
+OSStatus AUv2SetParameter(void* s, AudioUnitParameterID id, AudioUnitScope scope, AudioUnitElement el,
+                          AudioUnitParameterValue value, UInt32 offset)
+{
+  const long a[] = { PackParam(id), PackParam(scope), PackParam(el), PackParam(value), PackParam(offset) };
+  return CallEntry(s, kAudioUnitSetParameterSelect, a);
+}
+
+OSStatus AUv2ScheduleParameters(void* s, const AudioUnitParameterEvent* pEvents, UInt32 nEvents)
+{
+  const long a[] = { PackParam(pEvents), PackParam(nEvents) };
+  return CallEntry(s, kAudioUnitScheduleParametersSelect, a);
+}
+
+OSStatus AUv2Render(void* s, AudioUnitRenderActionFlags* pFlags, const AudioTimeStamp* pTimestamp,
+                    UInt32 outputBus, UInt32 nFrames, AudioBufferList* pBuffers)
+{
+  const long a[] = { PackParam(pFlags), PackParam(pTimestamp), PackParam(outputBus), PackParam(nFrames),
+                     PackParam(pBuffers) };
+  return CallEntry(s, kAudioUnitRenderSelect, a);
+}
+
+OSStatus AUv2MIDIEvent(void* s, UInt32 status, UInt32 data1, UInt32 data2, UInt32 offset)
+{
+  const long a[] = { PackParam(status), PackParam(data1), PackParam(data2), PackParam(offset) };
+  return CallEntry(s, kMusicDeviceMIDIEventSelect, a);
+}
+
+OSStatus AUv2SysEx(void* s, const UInt8* pData, UInt32 size)
+{
+  const long a[] = { PackParam(pData), PackParam(size) };
+  return CallEntry(s, kMusicDeviceSysExSelect, a);
+}
+
+AudioComponentMethod AUv2Lookup(SInt16 selector)
+{
+  switch (selector)
+  {
+    case kAudioUnitInitializeSelect:             return (AudioComponentMethod) AUv2Initialize;
+    case kAudioUnitUninitializeSelect:           return (AudioComponentMethod) AUv2Uninitialize;
+    case kAudioUnitGetPropertyInfoSelect:        return (AudioComponentMethod) AUv2GetPropertyInfo;
+    case kAudioUnitGetPropertySelect:            return (AudioComponentMethod) AUv2GetProperty;
+    case kAudioUnitSetPropertySelect:            return (AudioComponentMethod) AUv2SetProperty;
+    case kAudioUnitAddPropertyListenerSelect:    return (AudioComponentMethod) AUv2AddPropertyListener;
+    case kAudioUnitRemovePropertyListenerSelect: return (AudioComponentMethod) AUv2RemovePropertyListener;
+    case kAudioUnitRemovePropertyListenerWithUserDataSelect:
+      return (AudioComponentMethod) AUv2RemovePropertyListenerWithUserData;
+    case kAudioUnitAddRenderNotifySelect:        return (AudioComponentMethod) AUv2AddRenderNotify;
+    case kAudioUnitRemoveRenderNotifySelect:     return (AudioComponentMethod) AUv2RemoveRenderNotify;
+    case kAudioUnitGetParameterSelect:           return (AudioComponentMethod) AUv2GetParameter;
+    case kAudioUnitSetParameterSelect:           return (AudioComponentMethod) AUv2SetParameter;
+    case kAudioUnitScheduleParametersSelect:     return (AudioComponentMethod) AUv2ScheduleParameters;
+    case kAudioUnitRenderSelect:                 return (AudioComponentMethod) AUv2Render;
+    case kAudioUnitResetSelect:                  return (AudioComponentMethod) AUv2Reset;
+    case kMusicDeviceMIDIEventSelect:            return (AudioComponentMethod) AUv2MIDIEvent;
+    case kMusicDeviceSysExSelect:                return (AudioComponentMethod) AUv2SysEx;
+    default: break;
+  }
+  return NULL;
+}
+} // namespace
+
+// static
+OSStatus IPlugAU::AUv2Open(void* pSelf, AudioComponentInstance ci)
+{
+  AUv2Instance* pInstance = (AUv2Instance*) pSelf;
+  IPlugAU* _this = MakePlug();
+  _this->HostSpecificInit();
+  _this->PruneUninitializedPresets();
+  _this->mCI = (ComponentInstance) ci;
+  pInstance->mPlug = _this;
+  return noErr;
+}
+
+// static
+OSStatus IPlugAU::AUv2Close(void* pSelf)
+{
+  AUv2Instance* pInstance = (AUv2Instance*) pSelf;
+  if (pInstance->mPlug)
+  {
+    pInstance->mPlug->ClearConnections();
+    DELETE_NULL(pInstance->mPlug);
+  }
+  free(pInstance);
+  return noErr;
+}
+
+// static
+AudioComponentPlugInInterface* IPlugAU::AUv2Factory(const AudioComponentDescription*)
+{
+  AUv2Instance* pInstance = (AUv2Instance*) calloc(1, sizeof(AUv2Instance));
+  pInstance->mInterface.Open = AUv2Open;
+  pInstance->mInterface.Close = AUv2Close;
+  pInstance->mInterface.Lookup = AUv2Lookup;
+  pInstance->mInterface.reserved = NULL;
+  pInstance->mPlug = NULL;
+  return &pInstance->mInterface;
 }

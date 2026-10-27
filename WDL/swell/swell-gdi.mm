@@ -159,8 +159,7 @@ int SWELL_IsRetinaHWND(HWND hwnd)
   if (w)
   {
     NSRect r=NSMakeRect(0,0,1,1);
-    NSRect (*tmp)(id receiver, SEL operation, NSRect) = (NSRect (*)(id, SEL, NSRect))objc_msgSend_stret;
-    NSRect str = tmp(w,sel_getUid("convertRectToBacking:"),r);
+    NSRect str = [w convertRectToBacking:r]; // objc_msgSend_stret does not exist on arm64
 
     if (str.size.width > 1.9) return 1;
   }

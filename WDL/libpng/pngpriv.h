@@ -106,6 +106,9 @@
  * do this.
  */
 #ifndef PNG_ARM_NEON_OPT
+#  define PNG_ARM_NEON_OPT 0 /* the arm/ NEON sources are not part of the lice build */
+#endif
+#if 0
    /* ARM NEON optimizations are being controlled by the compiler settings,
     * typically the target FPU.  If the FPU has been set to NEON (-mfpu=neon
     * with GCC) then the compiler will define __ARM_NEON__ and we can rely
@@ -419,7 +422,8 @@
 #  include <float.h>
 
 #  if (defined(__MWERKS__) && defined(macintosh)) || defined(applec) || \
-    defined(THINK_C) || defined(__SC__) || defined(TARGET_OS_MAC)
+    defined(THINK_C) || defined(__SC__) || \
+    (defined(TARGET_OS_MAC) && !defined(__APPLE__)) /* <fp.h> is classic Mac only */
      /* We need to check that <math.h> hasn't already been included earlier
       * as it seems it doesn't agree with <fp.h>, yet we should really use
       * <fp.h> if possible.

@@ -138,6 +138,12 @@ END_FACTORY
     {
       return IPlugAU::IPlugAUEntry(params, pPlug);
     }
+#ifdef PLUG_FACTORY // optional: AU v2 AudioComponents entry point, needed for arm64 builds
+    EXPORT void* PLUG_FACTORY(const AudioComponentDescription* pDesc)
+    {
+      return IPlugAU::AUv2Factory(pDesc);
+    }
+#endif
     EXPORT ComponentResult PLUG_VIEW_ENTRY(ComponentParameters* params, void* pView)
     {
       return IPlugAU::IPlugAUCarbonViewEntry(params, pView);

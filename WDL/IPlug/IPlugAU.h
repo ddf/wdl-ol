@@ -20,6 +20,10 @@
 
 #define MAX_IO_CHANNELS 128
 
+// Private property the Cocoa view uses to get from an AudioUnit to its IPlugAU instance.
+// Replaces GetComponentInstanceStorage, which only works for Component Manager instances.
+#define kIPlugObjectPropertyID ((AudioUnitPropertyID) 0xFFFFFF9B)
+
 struct IPlugInstanceInfo
 {
   WDL_String mOSXBundleID, mCocoaViewFactoryClassName;
@@ -167,6 +171,13 @@ private:
   void InformListeners(AudioUnitPropertyID propID, AudioUnitScope scope);
 
 public:
+  // AU v2 (AudioComponent) entry points. They translate the modern AudioComponentPlugInInterface
+  // calls into the Component Manager style IPlugAUEntry. Registration happens through the
+  // AudioComponents key of the Info.plist, which is the only way to register an arm64 Audio Unit.
+  static AudioComponentPlugInInterface* AUv2Factory(const AudioComponentDescription* pDesc);
+  static OSStatus AUv2Open(void* pSelf, AudioComponentInstance ci);
+  static OSStatus AUv2Close(void* pSelf);
+
   static ComponentResult IPlugAUEntry(ComponentParameters *params, void* pVPlug);
   static ComponentResult IPlugAUCarbonViewEntry(ComponentParameters *params, void* pView);
   

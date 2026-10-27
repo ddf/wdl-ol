@@ -142,7 +142,11 @@ INT_PTR SWELLAppMain(int msg, INT_PTR parm1, INT_PTR parm2); // to be implemente
 
 
 // basic types
+#if defined(__APPLE__) && defined(__aarch64__)
+typedef bool BOOL; // matches Objective-C's BOOL on Apple Silicon
+#else
 typedef signed char BOOL;
+#endif
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
 typedef unsigned int DWORD;
